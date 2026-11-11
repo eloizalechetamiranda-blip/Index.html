@@ -1,246 +1,157 @@
-python
-import streamlit as st
-import pandas as pd
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-# ==========================================
-# NUTRIATHLETE - SISTEMA DE NUTRIÇÃO ESPORTIVA
-# ==========================================
+<title>NutriAthlete</title>
 
-st.set_page_config(
-    page_title="NutriAthlete",
-    page_icon="🏋️",
-    layout="wide"
-)
-
-# ESTILO VISUAL
-st.markdown("""
 <style>
-.stApp {
-    background-color: #101820;
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f3;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+}
+
+h1 {
+    color: #16834a;
+    text-align: center;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+button {
+    background: #16834a;
     color: white;
+    border: none;
+    cursor: pointer;
 }
-h1, h2, h3 {
-    color: #00DFA2;
-}
-.stButton>button {
-    background-color: #00DFA2;
-    color: black;
-    border-radius: 10px;
-    font-weight: bold;
+
+#resultado {
+    background: #e1f5e9;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 8px;
 }
 </style>
-""", unsafe_allow_html=True)
+</head>
 
-# TÍTULO
-st.title("🏋️ NUTRIATHLETE")
-st.subheader("Sistema Inteligente de Nutrição Esportiva")
+<body>
 
-st.markdown("---")
+<div class="container">
 
-# CADASTRO DO ATLETA
-st.header("👤 Cadastro do Atleta")
+<h1>NutriAthlete</h1>
+<p>Programa de acompanhamento alimentar para atletas</p>
 
-col1, col2 = st.columns(2)
+<label>Nome do atleta:</label>
+<input type="text" id="nome">
 
-with col1:
-    nome = st.text_input("Nome do atleta")
-    idade = st.number_input("Idade", 15, 100, 25)
-    sexo = st.selectbox("Sexo", ["Masculino", "Feminino"])
-    peso = st.number_input("Peso (kg)", 30.0, 250.0, 75.0)
+<label>Idade:</label>
+<input type="number" id="idade">
 
-with col2:
-    altura = st.number_input("Altura (m)", 1.30, 2.30, 1.75)
-    atividade = st.selectbox(
-        "Nível de atividade",
-        ["Sedentário", "Leve", "Moderado", "Intenso", "Muito intenso"]
-    )
+<label>Peso (kg):</label>
+<input type="number" id="peso">
 
-    objetivo = st.selectbox(
-        "Objetivo esportivo",
-        ["Hipertrofia", "Emagrecimento", "Manutenção"]
-    )
+<label>Altura (cm):</label>
+<input type="number" id="altura">
 
-    modalidade = st.selectbox(
-        "Modalidade esportiva",
-        ["Musculação", "Corrida", "Futebol", "Natação",
-         "Ciclismo", "Crossfit", "Outro"]
-    )
+<label>Sexo:</label>
+<select id="sexo">
+<option value="masculino">Masculino</option>
+<option value="feminino">Feminino</option>
+</select>
 
-# FATORES DE ATIVIDADE
-fatores = {
-    "Sedentário": 1.2,
-    "Leve": 1.375,
-    "Moderado": 1.55,
-    "Intenso": 1.725,
-    "Muito intenso": 1.9
+<label>Nível de atividade:</label>
+<select id="atividade">
+<option value="1.2">Sedentário</option>
+<option value="1.375">Leve</option>
+<option value="1.55">Moderado</option>
+<option value="1.725">Intenso</option>
+<option value="1.9">Muito intenso</option>
+</select>
+
+<button onclick="calcular()">Calcular necessidades</button>
+
+<div id="resultado"></div>
+
+</div>
+
+<script>
+
+function calcular() {
+
+    let nome = document.getElementById("nome").value;
+    let idade = Number(document.getElementById("idade").value);
+    let peso = Number(document.getElementById("peso").value);
+    let altura = Number(document.getElementById("altura").value);
+    let sexo = document.getElementById("sexo").value;
+    let atividade = Number(document.getElementById("atividade").value);
+
+    if (!nome || idade <= 0 || peso <= 0 || altura <= 0) {
+        alert("Preencha todos os campos corretamente!");
+        return;
+    }
+
+    let alturaMetros = altura / 100;
+
+    let imc = peso / (alturaMetros * alturaMetros);
+
+    let tmb;
+
+    if (sexo === "masculino") {
+        tmb = (10 * peso) + (6.25 * altura)
+        - (5 * idade) + 5;
+    } else {
+        tmb = (10 * peso) + (6.25 * altura)
+        - (5 * idade) - 161;
+    }
+
+    let calorias = tmb * atividade;
+
+    document.getElementById("resultado").innerHTML = `
+
+        <h2>Resultado do atleta</h2>
+
+        <p><strong>Nome:</strong> ${nome}</p>
+
+        <p><strong>IMC:</strong> ${imc.toFixed(2)}</p>
+
+        <p><strong>Metabolismo basal estimado:</strong>
+        ${tmb.toFixed(0)} kcal</p>
+
+        <p><strong>Gasto energético diário estimado:</strong>
+        ${calorias.toFixed(0)} kcal</p>
+
+        <h3>Sugestão de organização alimentar</h3>
+
+        <ul>
+            <li>Café da manhã: carboidratos e proteínas.</li>
+            <li>Lanche: frutas e alimentos proteicos.</li>
+            <li>Almoço: arroz, feijão, proteínas e vegetais.</li>
+            <li>Pré-treino: alimentos ricos em carboidratos.</li>
+            <li>Pós-treino: carboidratos e proteínas.</li>
+            <li>Jantar: refeição equilibrada.</li>
+        </ul>
+
+        <p><strong>Atenção:</strong> os valores são estimativas
+        e não substituem uma avaliação nutricional individualizada.</p>
+    `;
 }
 
-# CÁLCULOS
-if st.button("CALCULAR PLANEJAMENTO NUTRICIONAL"):
+</script>
 
-    if not nome.strip():
-        st.error("Informe o nome do atleta.")
-        st.stop()
-
-    altura_cm = altura * 100
-
-    # IMC
-    imc = peso / (altura ** 2)
-
-    # METABOLISMO BASAL
-    if sexo == "Masculino":
-        tmb = (10 * peso) + (6.25 * altura_cm) - (5 * idade) + 5
-    else:
-        tmb = (10 * peso) + (6.25 * altura_cm) - (5 * idade) - 161
-
-    # GASTO ENERGÉTICO
-    gasto = tmb * fatores[atividade]
-
-    # AJUSTE DE CALORIAS
-    ajustes = {
-        "Hipertrofia": 300,
-        "Emagrecimento": -300,
-        "Manutenção": 0
-    }
-
-    calorias = gasto + ajustes[objetivo]
-
-    # MACRONUTRIENTES ESTIMADOS
-    proteina = peso * 2
-    gordura = peso * 0.9
-
-    carboidrato = (
-        calorias - (proteina * 4) - (gordura * 9)
-    ) / 4
-
-    carboidrato = max(0, carboidrato)
-
-    # RESULTADOS
-    st.markdown("---")
-    st.header("📊 Resultado Nutricional")
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    c1.metric("IMC", f"{imc:.2f}")
-    c2.metric("Metabolismo basal", f"{tmb:.0f} kcal")
-    c3.metric("Gasto energético", f"{gasto:.0f} kcal")
-    c4.metric("Meta calórica", f"{calorias:.0f} kcal")
-
-    st.markdown("---")
-
-    st.header("🥗 Distribuição de Macronutrientes")
-
-    m1, m2, m3 = st.columns(3)
-
-    m1.metric("Proteínas", f"{proteina:.1f} g")
-    m2.metric("Carboidratos", f"{carboidrato:.1f} g")
-    m3.metric("Gorduras", f"{gordura:.1f} g")
-
-    # PLANO ALIMENTAR ILUSTRATIVO
-    st.markdown("---")
-    st.header("🍽️ Planejamento Alimentar")
-
-    refeicoes = {
-        "Café da manhã": [
-            "Ovos",
-            "Pão integral",
-            "Fruta",
-            "Leite ou iogurte"
-        ],
-        "Lanche da manhã": [
-            "Fruta",
-            "Iogurte natural",
-            "Aveia"
-        ],
-        "Almoço": [
-            "Arroz",
-            "Feijão",
-            "Frango ou peixe",
-            "Salada e legumes"
-        ],
-        "Pré-treino": [
-            "Banana",
-            "Aveia",
-            "Pão ou outra fonte de carboidrato"
-        ],
-        "Pós-treino": [
-            "Proteína alimentar",
-            "Batata ou arroz",
-            "Fruta"
-        ],
-        "Jantar": [
-            "Carne magra ou ovos",
-            "Arroz ou batata",
-            "Legumes"
-        ],
-        "Ceia": [
-            "Iogurte natural",
-            "Fruta ou outra opção proteica"
-        ]
-    }
-
-    for refeicao, alimentos in refeicoes.items():
-        with st.expander(refeicao):
-            for alimento in alimentos:
-                st.write("•", alimento)
-
-    # GRÁFICO DE MACRONUTRIENTES
-    st.markdown("---")
-    st.header("📈 Gráfico Nutricional")
-
-    dados = pd.DataFrame({
-        "Macronutriente": ["Proteínas", "Carboidratos", "Gorduras"],
-        "Quantidade (g)": [proteina, carboidrato, gordura]
-    })
-
-    st.bar_chart(
-        dados.set_index("Macronutriente")
-    )
-
-    # RESUMO
-    st.markdown("---")
-    st.header("📋 Relatório do Atleta")
-
-    relatorio = f"""
-    NUTRIATHLETE - RELATÓRIO NUTRICIONAL
-
-    Atleta: {nome}
-    Idade: {idade}
-    Sexo: {sexo}
-    Peso: {peso} kg
-    Altura: {altura} m
-    Modalidade: {modalidade}
-    Objetivo: {objetivo}
-
-    IMC: {imc:.2f}
-    Metabolismo basal: {tmb:.0f} kcal
-    Gasto energético: {gasto:.0f} kcal
-
-    Meta calórica estimada: {calorias:.0f} kcal
-
-    PROTEÍNAS: {proteina:.1f} g
-    CARBOIDRATOS: {carboidrato:.1f} g
-    GORDURAS: {gordura:.1f} g
-
-    Projeto NutriAthlete
-    """
-
-    st.download_button(
-        "📥 BAIXAR RELATÓRIO",
-        relatorio,
-        file_name="relatorio_atleta.txt"
-    )
-
-    st.success("Planejamento calculado com sucesso!")
-
-st.markdown("---")
-
-st.caption(
-    "NutriAthlete © 2026 | Sistema educacional de nutrição esportiva"
-)
-
-st.warning(
-    "Os cálculos são estimativas educativas, não prescrições nutricionais. "
-    "O planejamento alimentar individual deve ser validado por nutricionista. "
-    "O sistema não deve ser utilizado como prescrição automática para menores."
-)
+</body>
+</html>
