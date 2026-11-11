@@ -1,399 +1,246 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NovaAI - Inteligência Artificial</title>
+python
+import streamlit as st
+import pandas as pd
 
+# ==========================================
+# NUTRIATHLETE - SISTEMA DE NUTRIÇÃO ESPORTIVA
+# ==========================================
+
+st.set_page_config(
+    page_title="NutriAthlete",
+    page_icon="🏋️",
+    layout="wide"
+)
+
+# ESTILO VISUAL
+st.markdown("""
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background: #0b1020;
+.stApp {
+    background-color: #101820;
     color: white;
-    height: 100vh;
-    display: flex;
 }
-
-.sidebar {
-    width: 250px;
-    background: #111827;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+h1, h2, h3 {
+    color: #00DFA2;
 }
-
-.logo {
-    font-size: 27px;
+.stButton>button {
+    background-color: #00DFA2;
+    color: black;
+    border-radius: 10px;
     font-weight: bold;
-    color: #60a5fa;
-    margin-bottom: 15px;
-}
-
-button {
-    cursor: pointer;
-    border: none;
-    border-radius: 9px;
-    padding: 12px;
-    font-size: 14px;
-}
-
-.new-chat {
-    background: #2563eb;
-    color: white;
-}
-
-.new-chat:hover {
-    background: #1d4ed8;
-}
-
-.sidebar p {
-    color: #9ca3af;
-    font-size: 13px;
-}
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-header {
-    padding: 20px;
-    border-bottom: 1px solid #273449;
-    font-size: 19px;
-    font-weight: bold;
-}
-
-#messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.message {
-    max-width: 800px;
-    width: fit-content;
-    padding: 15px 18px;
-    border-radius: 14px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-.user {
-    align-self: flex-end;
-    background: #2563eb;
-}
-
-.bot {
-    align-self: flex-start;
-    background: #1e293b;
-}
-
-.welcome {
-    text-align: center;
-    margin: auto;
-    color: #dbeafe;
-}
-
-.welcome h1 {
-    font-size: 36px;
-    margin-bottom: 12px;
-}
-
-.welcome p {
-    color: #94a3b8;
-}
-
-.input-area {
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    border-top: 1px solid #273449;
-}
-
-.input-area input {
-    width: 75%;
-    max-width: 750px;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    background: #1e293b;
-    color: white;
-    outline: none;
-    font-size: 16px;
-}
-
-.send {
-    background: #2563eb;
-    color: white;
-    min-width: 65px;
-}
-
-.send:hover {
-    background: #1d4ed8;
-}
-
-footer {
-    text-align: center;
-    padding: 8px;
-    color: #64748b;
-    font-size: 11px;
-}
-
-@media(max-width: 650px) {
-    .sidebar {
-        width: 65px;
-        padding: 10px;
-        align-items: center;
-    }
-
-    .logo {
-        font-size: 17px;
-    }
-
-    .sidebar p {
-        display: none;
-    }
-
-    .new-chat {
-        font-size: 11px;
-        padding: 10px 5px;
-    }
-
-    #messages {
-        padding: 15px;
-    }
-
-    .welcome h1 {
-        font-size: 27px;
-    }
-
-    .input-area {
-        padding: 12px;
-    }
-
-    .input-area input {
-        width: 100%;
-    }
 }
 </style>
-</head>
-
-<body>
-
-<aside class="sidebar">
-
-    <div class="logo">✦ NovaAI</div>
-
-    <button class="new-chat" onclick="novaChat.novaConversa()">
-        + Nova conversa
-    </button>
-
-    <p>Sua inteligência artificial pessoal.</p>
-
-</aside>
-
-<main class="main">
-
-    <header>
-        ✦ NovaAI <span style="color:#60a5fa">• Assistente</span>
-    </header>
-
-    <section id="messages">
-
-        <div class="welcome" id="welcome">
-            <h1>Olá! Eu sou a NovaAI ✨</h1>
-            <p>Como posso ajudar você hoje?</p>
-        </div>
-
-    </section>
-
-    <div class="input-area">
-
-        <input
-            id="question"
-            type="text"
-            placeholder="Pergunte qualquer coisa..."
-            autocomplete="off"
-        >
-
-        <button class="send" onclick="novaChat.enviar()">
-            ➤
-        </button>
-
-    </div>
-
-    <footer>
-        NovaAI © 2026 — Inteligência artificial experimental.
-    </footer>
-
-</main>
-
-<script>
-
-const novaChat = {
-
-    historico: [],
-
-    enviar: function() {
-
-        const input = document.getElementById("question");
-        const pergunta = input.value.trim();
-
-        if (!pergunta) return;
-
-        input.value = "";
-
-        const welcome = document.getElementById("welcome");
-
-        if (welcome) welcome.remove();
-
-        this.adicionarMensagem(pergunta, "user");
-
-        this.historico.push({
-            usuario: pergunta
-        });
-
-        this.mostrarDigitando();
-
-        setTimeout(() => {
-
-            this.removerDigitando();
-
-            const resposta = this.pensar(pergunta);
-
-            this.adicionarMensagem(resposta, "bot");
-
-            this.historico.push({
-                assistente: resposta
-            });
-
-        }, 700);
-
-    },
-
-    adicionarMensagem: function(texto, tipo) {
-
-        const area = document.getElementById("messages");
-
-        const mensagem = document.createElement("div");
-
-        mensagem.className = "message " + tipo;
-        mensagem.textContent = texto;
-
-        area.appendChild(mensagem);
-
-        area.scrollTop = area.scrollHeight;
-
-    },
-
-    mostrarDigitando: function() {
-
-        const area = document.getElementById("messages");
-
-        const digitando = document.createElement("div");
-
-        digitando.id = "digitando";
-        digitando.className = "message bot";
-        digitando.textContent = "NovaAI está pensando...";
-
-        area.appendChild(digitando);
-
-    },
-
-    removerDigitando: function() {
-
-        const elemento = document.getElementById("digitando");
-
-        if (elemento) elemento.remove();
-
-    },
-
-    pensar: function(pergunta) {
-
-        const texto = pergunta.toLowerCase();
-
-        if (texto.includes("olá") || texto.includes("oi")) {
-            return "Olá! 😊 Sou a NovaAI. É um prazer conversar com você!";
-        }
-
-        if (texto.includes("seu nome")) {
-            return "Meu nome é NovaAI! Sou sua assistente virtual.";
-        }
-
-        if (texto.includes("quem criou")) {
-            return "Fui desenvolvida como um projeto de inteligência artificial chamado NovaAI.";
-        }
-
-        if (texto.includes("hora")) {
-            return "A hora atual do seu dispositivo é " +
-                new Date().toLocaleTimeString("pt-BR") + ".";
-        }
-
-        if (texto.includes("data")) {
-            return "Hoje é " +
-                new Date().toLocaleDateString("pt-BR") + ".";
-        }
-
-        if (texto.includes("ajuda")) {
-            return "Claro! Posso conversar com você, responder perguntas simples e ajudar com ideias. O que deseja fazer?";
-        }
-
-        if (texto.includes("programação") || texto.includes("código")) {
-            return "Programação é a arte de criar instruções para computadores. Posso ajudar você a estudar lógica, HTML, CSS, JavaScript e Python!";
-        }
-
-        if (texto.includes("obrigado") || texto.includes("obrigada")) {
-            return "Por nada! ❤️ Estou aqui para ajudar.";
-        }
-
-        if (texto.includes("tudo bem")) {
-            return "Tudo funcionando por aqui! E com você? 😊";
-        }
-
-        return "Entendi sua mensagem! 😊\n\nSou a NovaAI, uma assistente experimental. Atualmente consigo responder algumas perguntas predefinidas, mas ainda não estou conectada a um modelo de inteligência artificial generativa.\n\nExperimente perguntar sobre programação, meu nome, data ou horário.";
-    },
-
-    novaConversa: function() {
-
-        this.historico = [];
-
-        document.getElementById("messages").innerHTML = `
-            <div class="welcome" id="welcome">
-                <h1>Olá! Eu sou a NovaAI ✨</h1>
-                <p>Como posso ajudar você hoje?</p>
-            </div>
-        `;
-
+""", unsafe_allow_html=True)
+
+# TÍTULO
+st.title("🏋️ NUTRIATHLETE")
+st.subheader("Sistema Inteligente de Nutrição Esportiva")
+
+st.markdown("---")
+
+# CADASTRO DO ATLETA
+st.header("👤 Cadastro do Atleta")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    nome = st.text_input("Nome do atleta")
+    idade = st.number_input("Idade", 15, 100, 25)
+    sexo = st.selectbox("Sexo", ["Masculino", "Feminino"])
+    peso = st.number_input("Peso (kg)", 30.0, 250.0, 75.0)
+
+with col2:
+    altura = st.number_input("Altura (m)", 1.30, 2.30, 1.75)
+    atividade = st.selectbox(
+        "Nível de atividade",
+        ["Sedentário", "Leve", "Moderado", "Intenso", "Muito intenso"]
+    )
+
+    objetivo = st.selectbox(
+        "Objetivo esportivo",
+        ["Hipertrofia", "Emagrecimento", "Manutenção"]
+    )
+
+    modalidade = st.selectbox(
+        "Modalidade esportiva",
+        ["Musculação", "Corrida", "Futebol", "Natação",
+         "Ciclismo", "Crossfit", "Outro"]
+    )
+
+# FATORES DE ATIVIDADE
+fatores = {
+    "Sedentário": 1.2,
+    "Leve": 1.375,
+    "Moderado": 1.55,
+    "Intenso": 1.725,
+    "Muito intenso": 1.9
+}
+
+# CÁLCULOS
+if st.button("CALCULAR PLANEJAMENTO NUTRICIONAL"):
+
+    if not nome.strip():
+        st.error("Informe o nome do atleta.")
+        st.stop()
+
+    altura_cm = altura * 100
+
+    # IMC
+    imc = peso / (altura ** 2)
+
+    # METABOLISMO BASAL
+    if sexo == "Masculino":
+        tmb = (10 * peso) + (6.25 * altura_cm) - (5 * idade) + 5
+    else:
+        tmb = (10 * peso) + (6.25 * altura_cm) - (5 * idade) - 161
+
+    # GASTO ENERGÉTICO
+    gasto = tmb * fatores[atividade]
+
+    # AJUSTE DE CALORIAS
+    ajustes = {
+        "Hipertrofia": 300,
+        "Emagrecimento": -300,
+        "Manutenção": 0
     }
 
-};
+    calorias = gasto + ajustes[objetivo]
 
-document.getElementById("question").addEventListener(
-    "keydown",
-    function(event) {
+    # MACRONUTRIENTES ESTIMADOS
+    proteina = peso * 2
+    gordura = peso * 0.9
 
-        if (event.key === "Enter") {
-            novaChat.enviar();
-        }
+    carboidrato = (
+        calorias - (proteina * 4) - (gordura * 9)
+    ) / 4
 
+    carboidrato = max(0, carboidrato)
+
+    # RESULTADOS
+    st.markdown("---")
+    st.header("📊 Resultado Nutricional")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("IMC", f"{imc:.2f}")
+    c2.metric("Metabolismo basal", f"{tmb:.0f} kcal")
+    c3.metric("Gasto energético", f"{gasto:.0f} kcal")
+    c4.metric("Meta calórica", f"{calorias:.0f} kcal")
+
+    st.markdown("---")
+
+    st.header("🥗 Distribuição de Macronutrientes")
+
+    m1, m2, m3 = st.columns(3)
+
+    m1.metric("Proteínas", f"{proteina:.1f} g")
+    m2.metric("Carboidratos", f"{carboidrato:.1f} g")
+    m3.metric("Gorduras", f"{gordura:.1f} g")
+
+    # PLANO ALIMENTAR ILUSTRATIVO
+    st.markdown("---")
+    st.header("🍽️ Planejamento Alimentar")
+
+    refeicoes = {
+        "Café da manhã": [
+            "Ovos",
+            "Pão integral",
+            "Fruta",
+            "Leite ou iogurte"
+        ],
+        "Lanche da manhã": [
+            "Fruta",
+            "Iogurte natural",
+            "Aveia"
+        ],
+        "Almoço": [
+            "Arroz",
+            "Feijão",
+            "Frango ou peixe",
+            "Salada e legumes"
+        ],
+        "Pré-treino": [
+            "Banana",
+            "Aveia",
+            "Pão ou outra fonte de carboidrato"
+        ],
+        "Pós-treino": [
+            "Proteína alimentar",
+            "Batata ou arroz",
+            "Fruta"
+        ],
+        "Jantar": [
+            "Carne magra ou ovos",
+            "Arroz ou batata",
+            "Legumes"
+        ],
+        "Ceia": [
+            "Iogurte natural",
+            "Fruta ou outra opção proteica"
+        ]
     }
-);
 
-</script>
+    for refeicao, alimentos in refeicoes.items():
+        with st.expander(refeicao):
+            for alimento in alimentos:
+                st.write("•", alimento)
 
-</body>
-</html>
+    # GRÁFICO DE MACRONUTRIENTES
+    st.markdown("---")
+    st.header("📈 Gráfico Nutricional")
+
+    dados = pd.DataFrame({
+        "Macronutriente": ["Proteínas", "Carboidratos", "Gorduras"],
+        "Quantidade (g)": [proteina, carboidrato, gordura]
+    })
+
+    st.bar_chart(
+        dados.set_index("Macronutriente")
+    )
+
+    # RESUMO
+    st.markdown("---")
+    st.header("📋 Relatório do Atleta")
+
+    relatorio = f"""
+    NUTRIATHLETE - RELATÓRIO NUTRICIONAL
+
+    Atleta: {nome}
+    Idade: {idade}
+    Sexo: {sexo}
+    Peso: {peso} kg
+    Altura: {altura} m
+    Modalidade: {modalidade}
+    Objetivo: {objetivo}
+
+    IMC: {imc:.2f}
+    Metabolismo basal: {tmb:.0f} kcal
+    Gasto energético: {gasto:.0f} kcal
+
+    Meta calórica estimada: {calorias:.0f} kcal
+
+    PROTEÍNAS: {proteina:.1f} g
+    CARBOIDRATOS: {carboidrato:.1f} g
+    GORDURAS: {gordura:.1f} g
+
+    Projeto NutriAthlete
+    """
+
+    st.download_button(
+        "📥 BAIXAR RELATÓRIO",
+        relatorio,
+        file_name="relatorio_atleta.txt"
+    )
+
+    st.success("Planejamento calculado com sucesso!")
+
+st.markdown("---")
+
+st.caption(
+    "NutriAthlete © 2026 | Sistema educacional de nutrição esportiva"
+)
+
+st.warning(
+    "Os cálculos são estimativas educativas, não prescrições nutricionais. "
+    "O planejamento alimentar individual deve ser validado por nutricionista. "
+    "O sistema não deve ser utilizado como prescrição automática para menores."
+)
